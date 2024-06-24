@@ -27,7 +27,7 @@ const corsOptions = {
     }
   },
   methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization", "auth-token"], // Include auth-token
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
 };
 
@@ -59,11 +59,12 @@ const upload = multer({ storage: storage });
 // creating upload endpoint for images
 
 app.use("/images", express.static("upload/images"));
+
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
     success: 1,
     image_url:
-      `https://orvela-ecommerce.onrender.com/images/${req.file.filename}` ||
+      `https://orvela-ecommerce-api.onrender.com/images/${req.file.filename}` ||
       `http://localhost:${port}/images/${req.file.filename}`,
   });
 });
