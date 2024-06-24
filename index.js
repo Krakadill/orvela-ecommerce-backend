@@ -16,6 +16,7 @@ const whitelist = [
   "http://localhost:4000",
   "http://localhost:3500",
   "http://localhost:3000",
+  "http://localhost:5173",
 ];
 
 const corsOptions = {
@@ -26,9 +27,9 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization", "auth-token"],
-  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"], // Specify the allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization", "auth-token"], // Specify the allowed headers
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
 };
 
 app.use(cors(corsOptions));
