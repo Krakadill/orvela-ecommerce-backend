@@ -12,14 +12,14 @@ app.use(express.json());
 const port = 4000;
 const whitelist = [
   "https://orvela-ecommerce.onrender.com",
+  "https://orvela-ecommerce-api.onrender.com", // Add backend URL if separate from frontend
   "http://localhost:4000",
   "http://localhost:3500",
   "http://localhost:3000",
 ];
 
-// Set up CORS options
 const corsOptions = {
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
@@ -27,8 +27,8 @@ const corsOptions = {
     }
   },
   methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
+  allowedHeaders: ["Content-Type", "Authorization", "auth-token"],
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
