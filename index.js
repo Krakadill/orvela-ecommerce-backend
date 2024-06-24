@@ -315,8 +315,8 @@ app.post("/getcart", fetchUser, async (req, res) => {
   let userData = await Users.findOne({ _id: req.user.id });
   res.json(userData.cartData);
 });
-app.get("/men", (req, res) => {
-  let link = "https://orvela-ecommerce.onrender.com/men";
+app.get("/mens", (req, res) => {
+  let link = "https://orvela-ecommerce.onrender.com/mens";
   res.send(link);
 });
 
