@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
+const { link } = require("fs");
 const dotenv = require("dotenv").config();
 
 app.use(express.json());
@@ -313,6 +314,10 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
 app.post("/getcart", fetchUser, async (req, res) => {
   let userData = await Users.findOne({ _id: req.user.id });
   res.json(userData.cartData);
+});
+app.get("/men", (req, res) => {
+  let link = "https://orvela-ecommerce.onrender.com/men";
+  res.send(link);
 });
 
 ///errors
