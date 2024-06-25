@@ -10,21 +10,6 @@ const dotenv = require("dotenv").config();
 app.use(express.json());
 
 const port = 4000;
-const whitelist = [
-  "https://orvela-ecommerce.onrender.com",
-  "https://orvela-ecommerce-api.onrender.com", // Add backend URL if separate from frontend
-  "http://localhost:4000",
-  "http://localhost:3500",
-  "http://localhost:3000",
-  "http://localhost:5173",
-];
-
-const corsOptions = {
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"], // Specify the allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization", "auth-token"], // Specify the allowed headers
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
-};
 
 app.use(
   cors({
@@ -63,16 +48,16 @@ const upload = multer({ storage: storage });
 app.use(
   "/images",
   express.static("upload/images", {
-    setHeaders: (res, path) => {
-      const extname = path.extname(path).toLowerCase();
+    setHeaders: (res, filePath) => {
+      const extname = path.extname(filePath).toLowerCase();
       if (extname === ".png") {
-        res.set("Content-Type", "image/png");
+        res.setHeader("Content-Type", "image/png");
       } else if (extname === ".jpg" || extname === ".jpeg") {
-        res.set("Content-Type", "image/jpeg");
+        res.setHeader("Content-Type", "image/jpeg");
       } else if (extname === ".gif") {
-        res.set("Content-Type", "image/gif");
+        res.setHeader("Content-Type", "image/gif");
       } else {
-        res.set("Content-Type", "application/octet-stream");
+        res.setHeader("Content-Type", "application/octet-stream");
       }
     },
   })
