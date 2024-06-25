@@ -20,19 +20,20 @@ const whitelist = [
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"], // Specify the allowed HTTP methods
   allowedHeaders: ["Content-Type", "Authorization", "auth-token"], // Specify the allowed headers
   credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
 };
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"], // Specify the allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization", "auth-token"], // Specify the allowed headers
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.) to be sent
+  })
+);
 
 // Database connection with mongoDB
 let MONGODB_URL = process.env.DATABASE_URL;
@@ -59,7 +60,23 @@ const upload = multer({ storage: storage });
 
 // creating upload endpoint for images
 
-app.use("/images", express.static("upload/images"));
+app.use(
+  "/images",
+  express.static("upload/images", {
+    setHeaders: (res, path) => {
+      const extname = path.extname(path).toLowerCase();
+      if (extname === ".png") {
+        res.set("Content-Type", "image/png");
+      } else if (extname === ".jpg" || extname === ".jpeg") {
+        res.set("Content-Type", "image/jpeg");
+      } else if (extname === ".gif") {
+        res.set("Content-Type", "image/gif");
+      } else {
+        res.set("Content-Type", "application/octet-stream");
+      }
+    },
+  })
+);
 
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
