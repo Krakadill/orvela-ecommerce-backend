@@ -1,15 +1,16 @@
 const express = require("express");
 const app = express();
+const PORT = process.env.PORT || 3500;
+const path = require("path");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-const path = require("path");
 const cors = require("cors");
 const dotenv = require("dotenv").config();
 
-app.use(express.json());
+app.use("/", express.static(path.join(__dirname, "/public")));
 
-const port = 4000;
+app.use(express.json());
 
 app.use(
   cors({
@@ -22,15 +23,17 @@ app.use(
 
 // Database connection with mongoDB
 let MONGODB_URL = process.env.DATABASE_URL;
-mongoose.connect(MONGODB_URL);
+mongoose.connect(MONGODB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // API Creation
 app.get("/", (req, res) => {
   res.send("express app is running");
 });
 
-// image storage
-
+// Image storage
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
@@ -43,8 +46,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// creating upload endpoint for images
-
+// Creating upload endpoint for images
 app.use(
   "/images",
   express.static("upload/images", {
@@ -68,12 +70,11 @@ app.post("/upload", upload.single("product"), (req, res) => {
     success: 1,
     image_url:
       `https://orvela-ecommerce-api.onrender.com/images/${req.file.filename}` ||
-      `http://localhost:${port}/images/${req.file.filename}`,
+      `http://localhost:${PORT}/images/${req.file.filename}`,
   });
 });
 
 // Schema for creating products
-
 const Product = mongoose.model("Product", {
   id: {
     type: Number,
@@ -89,7 +90,7 @@ const Product = mongoose.model("Product", {
   },
   category: {
     type: String,
-    reqired: true,
+    required: true,
   },
   new_price: {
     type: Number,
@@ -109,7 +110,7 @@ const Product = mongoose.model("Product", {
   },
 });
 
-//// API FOR ADDING A PRODUCT
+// API for adding a product
 app.post("/addproduct", async (req, res) => {
   let products = await Product.find({});
   let id;
@@ -135,7 +136,7 @@ app.post("/addproduct", async (req, res) => {
   });
 });
 
-/// API FOR DELETING PRODUCTS
+// API for deleting products
 app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
   res.json({
@@ -144,14 +145,13 @@ app.post("/removeproduct", async (req, res) => {
   });
 });
 
-/// API for getting all products
-
+// API for getting all products
 app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   res.send(products);
 });
 
-// USER SCHEMA
+// User schema
 const Users = mongoose.model("User", {
   username: {
     type: String,
@@ -172,7 +172,7 @@ const Users = mongoose.model("User", {
   },
 });
 
-// Creating Endpoint for user registration
+// Endpoint for user registration
 app.post("/signup", async (req, res) => {
   let check = await Users.findOne({ email: req.body.email });
   if (check) {
@@ -221,21 +221,21 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// creating api for new collection
+// Creating API for new collection
 app.get("/newcollections", async (req, res) => {
   let products = await Product.find({});
   let newcollection = products.slice(1).slice(-8);
   res.send(newcollection);
 });
 
-// api for womens popular section
+// API for women's popular section
 app.get("/popularinwomen", async (req, res) => {
   let products = await Product.find({ category: "women" });
   let popular_in_women = products.slice(0, 4);
   res.send(popular_in_women);
 });
 
-// middleware for user cart
+// Middleware for user cart
 const fetchUser = async (req, res, next) => {
   const token = req.header("auth-token");
   if (!token) {
@@ -250,12 +250,13 @@ const fetchUser = async (req, res, next) => {
     }
   }
 };
+
 // API for cart
 app.post("/addtocart", fetchUser, async (req, res) => {
   try {
     // Log the incoming request body and user data for debugging
-    /* console.log("Request body:", req.body);
-    console.log("Authenticated user:", req.user); */
+    console.log("Request body:", req.body);
+    console.log("Authenticated user:", req.user);
 
     // Ensure itemId is present in the request body
     if (!req.body.itemId) {
@@ -298,7 +299,7 @@ app.post("/addtocart", fetchUser, async (req, res) => {
   }
 });
 
-// creating API for removing item from cart
+// Creating API for removing item from cart
 app.post("/removefromcart", fetchUser, async (req, res) => {
   let userData = await Users.findOne({ _id: req.user.id });
   if (userData.cartData[req.body.itemId] > 0) {
@@ -311,18 +312,17 @@ app.post("/removefromcart", fetchUser, async (req, res) => {
   }
 });
 
-// loading cart data
+// Loading cart data
 app.post("/getcart", fetchUser, async (req, res) => {
   let userData = await Users.findOne({ _id: req.user.id });
   res.json(userData.cartData);
 });
-
 ///errors
 
-app.listen(port, (error) => {
-  if (!error) {
-    console.log("Server running on port " + port);
-  } else {
+app.listen(PORT, (error) => {
+  if (error) {
     console.log("Error: " + error);
   }
 });
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
